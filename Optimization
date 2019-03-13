@@ -1,0 +1,49 @@
+#This code will maximize our objective function based on certain constraint
+
+#f(x1,x2)=2000000*(1/(1+exp(-0.00003*x1+8)))+3000000*(1/(1+exp(-0.00005*x2+12)))
+#Where 
+#    x1+x2=500000
+
+library(nloptr)
+
+#acceptable Lower limit which we can offer to algorithm to go
+lower=c(10000,10000)
+#acceptable upper limit which we can offer to algorithm to go
+upper=c(500000,500000)
+
+#Variables as per above function f(x1,x2)
+coef<-c(2000000,3000000)
+wt<-c(-0.00003,-0.00005)
+const<-c(8,12)
+
+#starting point
+x0<-runif(2,min=lower,max=upper)
+
+#we use negative sign to maximize our object function
+#Actually auglag function does minization of objective function by default
+obj_fun<-function(x){
+  res<-coef*(1/exp(wt*x+const))
+  return(-sum(res)) 
+}
+
+#obj_fun_gr <- function(x) nl.grad(x, obj_fun)
+
+const_fun<-function(x){
+  return(sum(x)-500000)
+}
+
+#const_fun_heqjac <- function(x) nl.jacobian(x, const_fun)
+
+# x<-auglag(x0=x0,fn=obj_fun,gr=obj_fun_gr,lower=lower,upper=upper
+#           ,heq=const_fun,heqjac=const_fun_heqjac)
+
+x<-auglag(x0=x0,fn=obj_fun,lower=lower,upper=upper
+          ,heq=const_fun)
+
+#check met condition
+sum(x$par)-500000
+
+#value of objective function at starting point
+abs(obj_fun(x0))
+#Value of objective function at optimal point
+abs(obj_fun(x$par)) #or abs(x$value)
