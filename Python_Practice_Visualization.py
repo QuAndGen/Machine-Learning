@@ -13,7 +13,7 @@ style.use('ggplot')
 
 
 
-train=pd.read_csv("D:/Ram\Python/Edu2code/Edu2code_Module1/linear_models/HOusing price/train.csv",header=0)
+train=pd.read_csv("D:/Ram/Python/Edu2code/Edu2code_Module1/linear_models/HOusing price/train.csv",header=0)
 
 
 train.head()
