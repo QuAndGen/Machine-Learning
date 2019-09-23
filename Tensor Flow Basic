@@ -1,0 +1,258 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 19 10:51:20 2019
+
+@author: rsingh
+"""
+
+import tensorflow as tf
+
+#Tensors are defined as multidimensional array or list.
+#
+#Tensors are identified by the following three parameters −
+#
+#Rank
+#Unit of dimensionality described within tensor is called rank. It identifies the number of dimensions of the tensor. A rank of a tensor can be described as the order or n-dimensions of a tensor defined.
+#
+#Shape
+#The number of rows and columns together define the shape of Tensor.
+#
+#Type
+#Type describes the data type assigned to Tensor’s elements.
+#
+#A user needs to consider the following activities for building a Tensor −
+#
+#Build an n-dimensional array
+#Convert the n-dimensional array.
+
+#One dimensional Tensor
+import numpy as np
+tensor_1d = np.array([1.3, 1, 4.0, 23.99])
+print(tensor_1d)
+
+#Two dimensional Tensors
+import numpy as np
+tensor_2d = np.array([(1,2,3,4),(4,5,6,7),(8,9,10,11),(12,13,14,15)])
+print(tensor_2d)
+
+tensor_2d[3][2]
+#Tensor Handling and Manipulations
+
+import tensorflow as tf
+import numpy as np
+
+matrix1 = np.array([(2,2,2),(2,2,2),(2,2,2)],dtype = 'int32')
+matrix2 = np.array([(1,1,1),(1,1,1),(1,1,1)],dtype = 'int32')
+
+print (matrix1)
+print (matrix2)
+
+matrix1 = tf.constant(matrix1)
+matrix2 = tf.constant(matrix2)
+matrix_product = tf.matmul(matrix1, matrix2)
+matrix_sum = tf.add(matrix1,matrix2)
+matrix_3 = np.array([(2,7,2),(1,4,2),(9,0,2)],dtype = 'float32')
+print (matrix_3)
+
+matrix_det = tf.compat.v2.linalg.det(matrix_3)
+with tf.compat.v1.Session() as sess:
+   result1 = sess.run(matrix_product)
+   result2 = sess.run(matrix_sum)
+   result3 = sess.run(matrix_det)
+
+print (result1)
+print (result2)
+print (result3)
+
+
+#Types of Tensor
+#In TensorFlow, all the computations pass through one or more tensors. A tensor is an object with three properties:
+
+#A unique label (name)
+#A dimension (shape)
+#A data type (dtype)
+
+#Each operation you will do with TensorFlow involves the manipulation of a tensor. There are four main tensors you can create:
+
+#tf.Variable
+#tf.constant
+#tf.placeholder
+#tf.SparseTensor
+
+#tf.constant(value, dtype, name = "")
+r1 = tf.constant(1, tf.int16) 
+print(r1)	
+
+# Named my_scalar
+r2 = tf.constant(1, tf.int16, name = "my_scalar") 
+print(r2)			
+
+
+# Decimal
+r1_decimal = tf.constant(1.12345, tf.float32)
+print(r1_decimal)
+# String
+r1_string = tf.constant("Guru99", tf.string)
+print(r1_string)
+
+## Rank 
+1r1_vector = tf.constant([1,3,5], tf.int16)
+print(r1_vector)
+r2_boolean = tf.constant([True, True, False], tf.bool)
+print(r2_boolean)
+
+## Rank 2
+r2_matrix = tf.constant([ [1, 2],
+                          [3, 4] ],tf.int16)
+print(r2_matrix)	
+
+## Rank 3
+r3_matrix = tf.constant([ [[1, 2],
+                           [3, 4], 
+                           [5, 6]] ], tf.int16)
+print(r3_matrix)	
+
+#**********************Shape of tensor
+# Shape of tensor
+m_shape = tf.constant([ [10, 11],
+                        [12, 13],
+                        [14, 15] ]                      
+                     ) 
+m_shape.shape	 #The matrix has 3 rows and 2 columns.
+# Create a vector of 0
+print(tf.zeros(10))	
+
+# Create a vector of 1
+print(tf.ones([10, 10]))
+
+# Create a vector of ones with the same number of rows as m_shape
+print(tf.ones(m_shape.shape[0]))	
+# Create a vector of ones with the same number of column as m_shape
+print(tf.ones(m_shape.shape[1]))	
+
+
+
+#******************Type of data
+print(m_shape.dtype)		
+
+# Change type of data
+type_float = tf.constant(3.123456789, tf.float32)
+type_int = tf.cast(type_float, dtype=tf.int32)
+print(type_float.dtype)
+print(type_int.dtype)	
+
+#*************************Creating operator
+tf.add(a, b)
+tf.substract(a, b)
+tf.multiply(a, b)
+tf.div(a, b)
+tf.pow(a, b)
+tf.exp(a)
+tf.sqrt(a)
+
+# Add
+tensor_a = tf.constant([[1,2]], dtype = tf.int32)
+tensor_b = tf.constant([[3, 4]], dtype = tf.int32)
+
+tensor_add = tf.add(tensor_a, tensor_b)print(tensor_add)	
+
+# Multiply
+tensor_multiply = tf.multiply(tensor_a, tensor_b)
+print(tensor_multiply)	
+
+#**********************Variables
+# Create a Variable
+## Create 2 Randomized values
+var = tf.get_variable("var", [1, 2])
+print(var.shape)
+
+# For instance, when you train a model, you need to have initial values to compute the weight of the features.
+var_init_1 = tf.get_variable("var_init_1", [1, 2], dtype=tf.int32,  initializer=tf.zeros_initializer)
+print(var_init_1.shape)		
+
+
+# Create a 2x2 matrix with defined initial points
+tensor_const = tf.constant([[10, 20],[30, 40]])
+# Initialize the first value of the tensor equals to tensor_const
+var_init_2 = tf.get_variable("var_init_2", dtype=tf.int32,  initializer=tensor_const)
+print(var_init_2.shape)	
+
+#*******************Placeholder
+#A placeholder has the purpose of feeding the tensor. Placeholder is 
+#used to initialize the data to flow inside the tensors. To supply a placeholder, 
+#you need to use the method feed_dict. The placeholder will be fed only within a session.
+#tf.placeholder(dtype,shape=None,name=None )
+data_placeholder_a = tf.placeholder(tf.float32, name = "data_placeholder_a")
+print(data_placeholder_a)	
+
+#Session
+#TensorFlow works around 3 main components:
+#
+##Graph --The graph is fundamental in TensorFlow. All of the mathematical 
+#            operations (ops) are performed inside a graph. You can imagine a graph as a 
+#            project where every operations are done. The nodes represent these ops, 
+#            they can absorb or create new tensors.
+#            Graphs and sessions are independent. You can run a session and get the 
+#             values to use later for further computations.
+
+##Tensor -- A tensor represents the data that progress between operations. 
+#           You saw previously how to initialize a tensor. The difference between a 
+#           constant and variable is the initial values of a variable will change over 
+#           time.
+##Session -- A session will execute the operation from the graph. To feed the graph 
+#            with the values of a tensor, you need to open a session. Inside a session, 
+#            you must run an operator to create an output.
+
+
+
+## Create, run  and evaluate a session
+x = tf.constant([2])
+y = tf.constant([4])	
+## Create operator
+multiply = tf.multiply(x, y)	
+## Create a session to run the code
+sess = tf.Session()result_1 = sess.run(multiply)
+print(result_1)
+sess.close()		
+
+#OR
+with tf.Session() as sess:    
+result_2 = multiply.eval()
+print(result_2) 	
+
+## Check the tensors created before
+sess = tf.Session()
+print(sess.run(r1))
+print(sess.run(r2_matrix))
+print(sess.run(r3_matrix))	
+
+#You can check the values of the variables you created before. Note that you need 
+#to use run to evaluate the tensor
+
+sess.run(tf.global_variables_initializer())
+print(sess.run(var))
+print(sess.run(var_init_1))
+print(sess.run(var_init_2))
+
+
+#You can use the placeholder you created before and feed it with actual value. 
+#You need to pass the data into the method feed_dict.
+
+#For example, you will take the power of 2 of the placeholder data_placeholder_a.
+
+import numpy as np
+power_a = tf.pow(data_placeholder_a, 2)
+with tf.Session() as sess:  
+data = np.random.rand(1, 10)   #feed_dict={data_placeholder_a: data}: Feed the placeholder with data
+print(sess.run(power_a, feed_dict={data_placeholder_a: data}))  # Will succeed.		
+
+# Tensor board 
+cd /Users/Ram/tuto_TF # set the path of tensorflow installed
+activate hello-tf	# activate tf
+tensorboard --logdir=.+ PATH	#launch tensor board
+#OR
+tensorboard --logdir=.\train\linreg #Where \train\linreg is path of log of model output
+# http://localhost:6006 #Run this in broweser.
+
+
+
