@@ -1,0 +1,71 @@
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import pathlib
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+import pandas  as pd
+
+from sklearn.preprocessing import MinMaxScaler
+
+
+
+df=pd.read_csv("C:\\Users\\rsingh.AW\\Desktop\\forecast.csv",header=0)
+
+df['Date']=pd.to_datetime(df.Date,format='%m/%d/%Y')
+
+train=df.loc[:15,'Val']
+test=df.loc[15:19,'Val']
+
+scaler = MinMaxScaler()
+train_norm=scaler.fit(data)
+
+def build_model():
+  model = keras.Sequential([
+    keras.layers.Dense(64, activation=tf.nn.relu, input_shape=[train_x.shape[1]]),
+    keras.layers.Dense(64, activation=tf.nn.relu),
+    keras.layers.Flatten(),
+    keras.layers.Dense(1)
+  ])
+  
+  optimizer = tf.keras.optimizers.RMSprop(0.001)
+  
+  model.compile(loss='mean_squared_error',
+                optimizer=optimizer,
+                metrics=['mean_absolute_error', 'mean_squared_error'])
+  return model
+
+
+model = build_model()
+
+model.summary()
+
+class PrintDot(keras.callbacks.Callback):
+  def on_epoch_end(self, epoch, logs):
+    if epoch % 100 == 0: print('')
+    print('.', end='')
+
+
+EPOCHS = 1000
+history = model.fit(
+  train_x, train_y,
+  epochs=EPOCHS, validation_split = 0.2, verbose=0,
+  callbacks=[PrintDot()])
+
+train_y_p = model.predict(train_x)
+test_y_p = model.predict(test_x)
+
+train_y_p = scaler.inverse_transform(model.predict(train_x))
+test_y_p = scaler.inverse_transform(model.predict(test_x))
+
+data={'Actual':pd.Series(train_y),'Pred':pd.Series(train_y_p)}
+dataset = pd.DataFrame(data)
+
+
+
