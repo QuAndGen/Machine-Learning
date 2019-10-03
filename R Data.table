@@ -1,0 +1,426 @@
+
+library(data.table)
+#Create data.tables
+
+DT<-data.table(x = c("A", "B"), y = 1:4)
+trial.table <- as.table(trial)
+
+
+#select data
+
+DT[2]                                       # 2nd row
+DT[2:3]                                     # 2nd and 3rd row
+DT[!2:4]                                    # all rows other than 2:4
+DT[-(2:4)]                                  # same
+
+DT[, v]                                     # v column (as vector)
+DT[, list(v)]                               # v column (as data.table)
+DT[, .(v)]                                  # same; .() is an alias for list()
+
+DT[, 2]                                     # 2nd column, a data.table always
+#OR
+colNum = 2                                  
+DT[, ..colNum]                              # same as DT[,2]; ..var => one-up
+
+DT[,c('x','y')]
+DT[, .(x, y)]
+
+DT[, .(new_name = old_name, new_name1 = old_name1)]
+
+DT[, -(x:y)]
+DT[, !(x:y)]
+
+#OR
+cols=c('x','y')
+DT[, ..cols]                               # same as DT[,2]; ..var => one-up
+
+DT[['x']]                                   # select one column as vector
+
+
+#sorting data table
+DT[order(x)]                                # no need for DT$ prefix on column x
+DT[order(x), ]                              # same; the ',' is optional
+
+#rename columns
+
+#delete new columns
+
+
+#filter data 
+DT[y>2]                                     # all rows where DT$y > 2
+DT[y>2 & v>5]                               # compound logical expressions
+
+DT["a", on="x"]                             # same as x == "a" but uses key (fast)
+DT["a", on=.(x)]                            # same
+DT[.("a"), on="x"]                          # same
+DT[x=="a"]                                  # same, == internally optimized
+DT[x!="b" | y!=3]                           # not yet optimized
+DT[.("b", 3), on=c("x", "y")]               # same as DT[x=="b" & y==3]
+DT[.("b", 3), on=.(x, y)]                   # same
+DT[.("b", 1:2), on=c("x", "y")]             # no match returns NA
+DT[.("b", 1:2), on=.(x, y), nomatch=0]      # no match row is not returned
+DT[.("b", 1:2), on=c("x", "y"), roll=Inf]   # locf, previous row rolls forward
+DT[.("b", 1:2), on=.(x, y), roll=-Inf]      # nocb, next row rolls backward
+
+
+#add/delete new columns
+# add/update/delete by reference (see ?assign)
+print(DT[, z:=42L])                         # add new column by reference
+print(DT[, z:=NULL])                        # remove column by reference
+print(DT["a", v:=42L, on="x"])              # subassign to column
+print(DT["b", v2:=84L, on="x"])             # subassign to new column (NA padded)
+
+DT[, m:=mean(v), by=x][]                    # add new column by reference by group
+                    # postfix [] is shortcut to print()
+
+#JOINS
+DT<-data.table(x = c("A", "B"), y = 1:4)
+X = data.table(x=c("c","b"), v=8:7, foo=c(4,2))
+
+
+DT[X, on="x"]                               # right join
+X[DT, on="x"]                               # left join
+DT[X, on="x", nomatch=0]                    # inner join
+DT[!X, on="x"]                              # not join
+DT[X, on=c(y="v")]                          # join DT$y to X$v
+DT[X, on="y==v"]                            # same
+
+                                            #select column x, y from DT table, foo
+DT[X, .(x,y,x.y,v), on=.(x, y>=foo)]        # select x's join columns as well
+
+DT[X, on="x", mult="first"]                 # first row of each group
+DT[X, on="x", mult="last"]                  # last row of each group
+DT[X, sum(v), by=.EACHI, on="x"]            # join and eval j for each row in i
+DT[X, sum(v)*foo, by=.EACHI, on="x"]        # join inherited scope
+DT[X, sum(v)*i.v, by=.EACHI, on="x"]        # 'i,v' refers to X's v column
+DT[X, on=.(x, v>=v), sum(y)*foo, by=.EACHI] # non-equi join with by=.EACHI
+
+# setting keys
+kDT = copy(DT)                              # copy DT to kDT to work with it
+setkey(kDT,x)                               # set a 1-column key.
+setkeyv(kDT,"x")                            # same (v in setkeyv stands for vector)
+
+kDT["a"]                                    # subset-as-join on *key* column 'x'
+kDT["a", on="x"]                            # same, being explicit using 'on='
+
+kDT[!"a", sum(y), by=.EACHI]                # get sum(v) for each i != "a"
+#OR
+kDT[!"a", sum(y), by=x]                # get sum(v) for each i != "a"
+
+# multi-column key
+setkey(kDT,x,y)                             # 2-column key
+setkeyv(kDT,c("x","y"))                     # same
+
+# fast *keyed* subsets on multi-column key
+kDT["a"]                                    # join to 1st column of key
+kDT["a", on="x"]                            # on= is optional but preferred
+kDT[.("a")]                                 # same; .() is an alias for list()
+kDT[list("a")]                              # same
+kDT[.("a", 3)]                              # join to 2 columns
+kDT[.("a", 3:6)]                            # join 4 rows (2 missing)
+kDT[.("a", 3:6), nomatch=0]                 # remove missing
+kDT[.("a", 3:6), roll=TRUE]                 # locf rolling join
+kDT[.("a", 3:6), roll=Inf]                  # same
+kDT[.("a", 3:6), roll=-Inf]                 # nocb rolling join
+kDT[!.("a")]                                # not join
+kDT[!"a"]                                   # same
+
+
+#summarize data
+dt <- data.table(mtcars)[, .(cyl, gear)] #select unique cyl and gear
+dt[,unique(gear), by=cyl]               #select unique cyl and gear
+
+DT[, sum(v)]                                # sum of column v, returned as vector
+DT[, .(sum(v))]                             # same but return data.table
+DT[, .(sv=sum(v))]                          # same but name column "sv"
+DT[, .(v, v*2)]                             # return two column data.table
+
+DT[, sum(v), by=x]                          # appearance order of groups preserved
+DT[, sum(v), keyby=x]                       # order the result by group
+DT[, sum(v), by=x][order(x)]                # same by chaining expressions together
+
+DT["b", sum(v*y), on="x"]                   # same as DT[x=="b", sum(v*y)]
+
+DT[x!="a", sum(v), by=x]                    # get sum(v) by "x" for each i != "a"
+DT[!"a", sum(v), by=.EACHI, on="x"]         # same, but using subsets-as-joins
+DT[c("b","c"), sum(v), by=.EACHI, on="x"]   # same
+DT[c("b","c"), sum(v), by=.EACHI, on=.(x)]  # same, using on=.()
+# more on special symbols, see also ?"special-symbols"
+
+
+DT[.N]                                      # last row
+DT[, .N]                                    # total number of rows in DT
+DT[, .N, by=x]                              # number of rows in each group
+DT[, .SD, .SDcols=x:y]                      # select columns 'x' and 'y'
+DT[, .SD[1]]                                # first row; same as DT[1,]
+DT[, .SD[1], by=x]                          # first row of each group
+DT[, c(.N, lapply(.SD, sum)), by=x]         # group size alongside sum
+DT[, .I[1], by=x]                           # row number of first row of each group
+DT[, grp := .GRP, by=x]                     # add a group counter column
+X[, DT[.BY, y, on="x"], by=x]               # join within group to use less ram
+
+# advanced usage
+DT[, sum(v), by=.(y%%2)]                    # expressions in by
+DT[, sum(v), by=.(bool = y%%2)]             # same with name for group expression
+DT[, .SD[2], by=x]                          # get 2nd row of each group
+DT[, tail(.SD,2), by=x]                     # last 2 rows of each group
+DT[, lapply(.SD, sum), by=x]                # sum of all columns for each group
+DT[, .SD[which.min(v)], by=x]               # nested query by group
+
+DT[, list(MySum=sum(v),
+          MyMin=min(v),
+          MyMax=max(v)),
+   by=.(x, y%%2)]                          # by 2 expressions
+
+DT[, .(a = .(a), b = .(b)), by=x]           # list columns
+DT[, .(seq = min(a):max(b)), by=x]          # j is not limited to just aggregations
+DT[, sum(v), by=x][V1<20]                   # compound query
+DT[, sum(v), by=x][order(-V1)]              # ordering results
+DT[, c(.N, lapply(.SD,sum)), by=x]          # group size and sums by group
+DT[, {tmp <- mean(y);                       # anonymous lambda in 'j'; j any valid
+.(a = a-tmp, b = b-tmp)               #   expression where every element
+}, by=x]                              #   becomes a column in result
+
+pdf("new.pdf")
+DT[, plot(a,b), by=x]                       # can also plot in 'j'
+dev.off()
+
+# get max(y) and min of a set of columns for each consecutive run of 'v'
+DT[, c(.(y=max(y)), lapply(.SD, min)), by=rleid(v), .SDcols=v:b]
+
+
+#project with data table
+#Add all categories of gear for each cyl to original data.table as a list.
+
+dt <- data.table(mtcars)[,.(gear, cyl)]
+dt[,gearsL:=list(list(unique(gear))), by=cyl] # original, ugly
+dt[,gearsL:=.(list(unique(gear))), by=cyl] # improved, pretty
+##    gear cyl gearsL
+## 1:    4   6  4,3,5
+
+#Extract second element of each list in gearL1 and create row gearL1
+dt[,gearL1:=lapply(gearsL, function(x) x[2])]
+dt[,gearS1:=sapply(gearsL, function(x) x[2])]
+##    gear cyl gearsL gearL1 gearS1
+## 1:    4   6  4,3,5      3      3
+#OR
+dt[,gearL1:=lapply(gearsL, `[`, 2)]
+dt[,gearS1:=sapply(gearsL, `[`, 2)]
+#Calculate all the gears for all cars of each cyl (excluding the current current row)
+dt[,other_gear:=mapply(function(x, y) setdiff(x, y), x=gearsL, y=gear)]
+#OR
+dt[,other_gear:=mapply(function(x, y) setdiff(x, y), x=gearsL, y=gear)]
+#OR
+dt[,other_gear:=mapply(setdiff, gearsL, gear)]
+
+#chain calculation on one column
+dt[,{tmp1=mean(mpg); tmp2=mean(abs(mpg-tmp1)); tmp3=round(tmp2, 2)}, by=cyl]
+
+#get the list of columns
+dt[,{tmp1=mean(mpg); tmp2=mean(abs(mpg-tmp1)); tmp3=round(tmp2, 2); list(tmp2=tmp2, tmp3=tmp3)}, by=cyl]
+#chain calculation on one column without semicolon
+dt[,{tmp1=mean(mpg)
+    tmp2=mean(abs(mpg-tmp1))
+    tmp3=round(tmp2, 2)
+      list(tmp2=tmp2, tmp3=tmp3)},
+by=cyl]
+
+#chain calculation on one column
+dt[,tmp1:=mean(mpg), by=cyl][,tmp2:=mean(abs(mpg-tmp1)), by=cyl][,tmp1:=NULL]
+
+#do particular operation with set of columns
+#here we are substracting 1 from column 1 and 2. In case of several columns
+#we can give selected columns and do our task
+dt <- data.table(x=c(1,4,1),y=c(5,2,4))
+for (j in c(1L,2L)) set(dt, j=j, value=dt[[j]]-1) # integers using 'L' passed for efficiency
+for (j in c(1L,2L)) set(dt, j=j, value=paste0(dt[[j]],'!!'))
+head(dt)
+
+
+#Shift you data one index down and do some calculation kind of lag etc
+# creating some data
+n <- 30
+dt <- data.table(
+  date=rep(seq(as.Date('2010-01-01'), as.Date('2015-01-01'), by='year'), n/6), 
+  ind=rpois(n, 5),
+  entity=sort(rep(letters[1:5], n/5))
+)
+#way 1
+setkey(dt, entity, date) # important for ordering
+dt[,indpct_fast:=(ind/shift(ind, 1))-1, by=entity]
+
+#way 2
+#Generate one columns data by shifting one cell below and keep first as NA
+lagpad <- function(x, k) c(rep(NA, k), x)[1:length(x)]  
+dt[,indpct_slow:=(ind/lagpad(ind, 1))-1, by=entity]
+
+head(dt, 10)
+
+#Create multiple columns with := in one statement
+dt[,`:=`(avg=mean(mpg), med=median(mpg), min=min(mpg)), by=cyl]
+head(dt)
+#Assign a column with := named with a character object
+
+thing2 <- 'mpgx2' #column name as variable
+dt[,(thing2):=mpg*2]
+
+#**************************group by***********************************
+#count number of records after filter
+dt[origin == "JFK" & month == 6L, .N]
+
+#group by on one column
+dt[, mpg_biased_mean:=mean(mpg), by=cyl] 
+#group by on multiple column
+DT[, Mean:=mean(X), by=list(Y, Z)]
+DT[, Mean:=mean(X), by=.(Y, Z)]
+
+#multiple column summary
+dt[,`:=`(avg=mean(mpg), med=median(mpg), min=min(mpg)), by=cyl]
+#OR
+x[ , c("mean", "sum") := list(mean(b), sum(b)), by = a]
+#we can replace "list" with "."
+x[ , c("mean", "sum") := .(mean(b), sum(b)), by = a]
+
+mynames = c("Name1", "Longer%")
+x[ , (mynames) := list(mean(b) * 4, sum(b) * 3), by = a]
+
+x[ , mynames := list(mean(b) * 4, sum(b) * 3), by = a, with = FALSE]
+x[ , get("mynames") := list(mean(b) * 4, sum(b) * 3), by = a]
+
+x[ , eval(mynames) := list(mean(b) * 4, sum(b) * 3), by = a]
+#get unique count of each element in group by
+#this will give new output
+values[, list(x=length(value)),by = list(unique.values = value)]
+
+values[, .(x=length(value)),by = list(unique.values = value)]
+
+#this will modify existing table
+values[, x:=length(value),by = list(unique.values = value)]
+
+
+#dt <- data.table(mtcars)[,.(cyl, gear, mpg)]
+
+#advance way to summarize your data
+uid <- unique(dt$gear)
+dt[, dt[!gear %in% (uid[.GRP]), mean(mpg), by=cyl] , by=gear][order(cyl, gear)] #unbiased mean
+
+
+#dt<-data.table(x=c(1,1,1,2,2,2),x1=c('a','b','a','b','a','b'),y=c(43,53,56,23,53,64))
+#summarize your data
+dt[,  .SD[, sum(y), by=x1], by=x]
+#OR
+dt[,  list(x=sum(y)), by=list(x,x1)]
+#OR
+dt[,  .(x=sum(y)), by=list(x,x1)]
+
+#use nested function
+dt[,{
+  vbar = mean(y)
+  n = .N
+  .SD[,(n*vbar-sum(y))/(n-.N),by=x1]
+} , by=x]
+
+#apply filter on numerical column as well as use that condition in group by
+flights[, .N, .(dep_delay>0, arr_delay>0)]
+
+#    dep_delay arr_delay      N
+# 1:      TRUE      TRUE  72836
+# 2:     FALSE      TRUE  34583
+# 3:     FALSE     FALSE 119304
+# 4:      TRUE     FALSE  26593
+#With new name
+DT[, .N, .(dep_delayed = dep_delay>0, arr_delayed = arr_delay>0)]
+
+#group by and order by 
+flights[,.(mean(arr_delay), mean(dep_delay)),keyby = .(origin, dest, month)]
+
+
+
+# use of .SD ( subset of data)
+#it takes all data expect the column which has been used in "by" statement 
+#for each group of "by" column data will be splited
+
+DT[, print(.SD), by = ID] #except ID column all column will be in .SD
+#mean of all columns by each group of ID element
+#To compute on (multiple) columns, we can then simply use the base R function 
+#lapply(). Since lapply() returns a list, so there is no need to wrap it with an additional .()
+DT[, lapply(.SD, mean), by = ID]
+#    ID   a    b    c
+# 1:  b 2.0  8.0 14.0
+# 2:  a 4.5 10.5 16.5
+# 3:  c 6.0 12.0 18.0
+
+#**************************.SDcols********************************
+
+#Using the argument .SDcols. It accepts either column names or column indices. 
+#For example, .SDcols = c("arr_delay", "dep_delay") ensures that .SD contains 
+#only these two columns for each group.
+
+# you can also provide the columns to remove instead of columns to keep 
+#using - or ! sign as well as select consecutive columns as colA:colB and 
+#deselect consecutive columns as !(colA:colB) or -(colA:colB).
+
+flights[carrier == "AA",                       ## Only on trips with carrier "AA"
+        lapply(.SD, mean),                     ## compute the mean
+        by = .(origin, dest, month),           ## for every 'origin,dest,month'
+        .SDcols = c("arr_delay", "dep_delay")] ## for just those specified in .SDcols
+
+#get top 2 rows by month
+flights[, head(.SD, 2), by = month]
+#concatinet two columns by group id
+DT[, .(val = c(a,b)), by = ID]
+
+# get all value for ID column
+DT[, .(val = list(c(a)), by = ID]
+# get all value for two column by ID column
+DT[, .(val = list(c(a,b))), by = ID]
+
+#print each row by ID
+DT[, print(c(a,b)), by = ID]
+#print each row by ID in form of list
+DT[, print(list(c(a,b))), by = ID]
+
+#use function for some columns- this funciton is taking unbaised mean
+leaveOneOutMean <- function(dt, ind, bybig, bysmall) {
+  dtmp <- copy(dt) # copy so as not to alter original dt object w intermediate assignments
+  dtmp <- dtmp[is.na(get(ind))==F,]
+  dtmp[,`:=`(avg_ind_big=mean(get(ind)), Nbig=.N), by=.(get(bybig))]
+  dtmp[,`:=`(Nbigsmall=.N, avg_ind_big_small=mean(get(ind))), by=.(get(bybig), get(bysmall))]
+  dtmp[,unbmean:=(avg_ind_big*Nbig-(Nbigsmall*avg_ind_big_small))/(Nbig-Nbigsmall)]
+  return(dtmp[,unbmean])
+}
+dt[,unbiased_mean:=leaveOneOutMean(.SD, ind='mpg', bybig='cyl', bysmall='gear')]
+
+#sample in data table
+dt[sample(1:.N, 100000, replace=T), ]
+
+### devtools::install_github('brooksandrew/Rsenal')
+#bin and do aggregation
+library('Rsenal') # grabbing depthbin function
+tmp <- dt[, .(N=.N, sum=sum(vs), mean=mean(vs)/.N), by=depthbin(mpg, 5, labelOrder=T)]
+
+#plot inside of data table
+tmp[,barplot(mean, names=depthbin, las=2)]
+
+#use function to select data
+myfunc <- function(dt, v) dt[,get(v)]
+
+myfunc(dt, 'mpg')
+
+#add new columns through functions
+df <- mtcars[,c('cyl', 'mpg')]
+
+add_column_df <- function(df) {
+  df$addcol1<- 'here in func!' #this will show in function only
+  df$addcol2 <<- 'in glob env!' #this will modify existing table
+  return(df)
+}
+
+head(add_column_df(df)) #we can see addcol1 here
+
+head(df) #we can see addcol2 here
+
+
+
+
+
