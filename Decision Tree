@@ -1,0 +1,38 @@
+#Entropy without split (Where #class1=a and #class2=b and #Total Number=N )
+Entropy_before = - (a/N)*log2(a/N) - (b/N)*log2(b/N) 
+
+#Entropy after split in left branch (Where #class1=a1 and #class2=b1 and #Total instances in right branch=N1 )
+Entropy_left = - (a1/N1)*log2(a1/N1) - (b1/N1)*log2(b1/N1) 
+
+#Entropy after split in right branch (Where #class1=a2 and #class2=b2 and #Total instances in right branch=N2 )
+Entropy_right = - (a2/N2)*log2(a2/N2) - (b2/N2)*log2(b2/N2) 
+
+#Entropy after split with weightage, as N1 instances went right and N2 instances went left
+Entropy_after = N1/N*Entropy_left + N2/N*Entropy_right 
+
+Information_Gain = Entropy_before - Entropy_after 
+
+#Example
+#As you can see, before the split we had 9 males and 5 females, i.e. P(m)=9/14 and P(f)=5/14. According to the definition of entropy:
+
+Entropy_before = - (5/14)*log2(5/14) - (9/14)*log2(9/14) = 0.9403
+
+#Next we compare it with the entropy computed after considering the split by looking at two child branches. 
+#In the left branch of City='Delhi', we have: 3 observation and out of that 4 are male and 1 is female
+
+Entropy_left = - (3/7)*log2(3/7) - (4/7)*log2(4/7) = 0.9852
+
+#and the right branch of City='Mumbai', we have: 7 observation and out of that 6 are male and 1 is female
+
+Entropy_right = - (6/7)*log2(6/7) - (1/7)*log2(1/7) = 0.5917
+
+#We combine the left/right entropies using the number of instances down 
+#each branch as weight factor (7 instances went left, and 7 instances went right), 
+#and get the final entropy after the split:
+
+Entropy_after = 7/14*Entropy_left + 7/14*Entropy_right = 0.7885
+
+#Now by comparing the entropy before and after the split, we obtain a measure of information gain, 
+#or how much information we gained by doing the split using that particular feature:
+
+Information_Gain = Entropy_before - Entropy_after = 0.1518
