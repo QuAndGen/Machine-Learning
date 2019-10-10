@@ -1,0 +1,76 @@
+---
+title: <h3 align="center"><font color="blue" size=7><b> Model name </b> </font> </h3> 
+output:
+  html_notebook: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r global_options,include=FALSE}
+knitr::opts_chunk$set(echo=FALSE,warning = F,message=F,cache = T)
+```
+<h3 align="left"><font color="green" size=5><b> Data description </b> </font> </h3>
+* **Total samples				: 1000**
+* **Event samples                         : 300**
+* **Non-Event samples     : 700**
+
+<h3 align="left"><font color="green" size=5><b> Variables description</b> </font> </h3>
+
+* ID
+* col1
+* col2
+
+# ----------------------------------------------------------------------------------------------
+
+# **Main** {.tabset .tabset-fade .tabset-pills}
+## **Main 1** 
+```{r echo=F, fig.width=8,fig.height=5}
+your code here
+```
+## **Main 2** 
+```{r echo=F, fig.width=8,fig.height=5}
+g1<-plot1
+
+g2<-plot2
+
+g3<-plot3
+subplot(g1, g2,g3, margin = 0.1,nrows=2)
+#OR
+
+grid.arrange(grobs =list(g1,g2,g3),nrow=3)
+
+```
+
+## **Main 3** 
+```{r echo=F, fig.width=8,fig.height=5}
+table  %>%
+   mutate(col2 = kableExtra::cell_spec(
+    Algorithm, color = "white", bold = T,
+    background = kableExtra::spec_color(1, end = 0.9, option = "A", direction = -1)
+  )) %>%
+  knitr::kable(.,escape = F, align = "c") %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = T, position = "float_right") 
+
+```
+
+map_fun<-function(data){
+  us <- data.table(map_data("state"))
+  
+  df<-us[,.(lat=mean(lat),long=mean(long)),by=region]
+  
+  df<-merge(df,data,by='region')
+  
+  ggplot(data, aes(map_id = region)) +
+    geom_map(aes(fill = `col1`), map = us,color="#ffffff", size=0.15) +
+    expand_limits(x = us$long, y = us$lat)+scale_fill_viridis_c(option = "viridis")+
+    geom_text(data=df,aes(x=long,y=lat,label=`col1`), vjust=-0.25)+
+    labs(x=NULL, y=NULL)+
+    coord_map("albers", lat0 = 39, lat1 = 45)+
+    theme(panel.border = element_blank())+
+    theme(panel.background = element_blank())+
+    theme(axis.ticks = element_blank())+
+    theme(axis.text = element_blank())
+ #ggplotly(g)
+  #, position=position_dodge(width=0.9)
+}
