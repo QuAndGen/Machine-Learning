@@ -1,0 +1,33 @@
+import boto3
+import pandas as pd
+
+# connect by S3 access key id and access key
+client = boto3.client(service_name='athena',region_name='us-east-1'
+			,aws_access_key_id='key_id'
+                      ,aws_secret_access_key= 'access_key'
+                      )
+
+#OR 
+# connect by Athena user ID and password
+client = boto3.client(service_name='athena',region_name='us-east-1'
+                      ,UID='user id'
+                      ,PWD= 'password'
+                      )
+
+ 
+
+s3 = boto3.resource('s3')
+
+queryStart = client.start_query_execution(
+    QueryString = 'SELECT * FROM tablename'
+    ,QueryExecutionContext = {'Database': 'dbname'}
+    ,ResultConfiguration={'OutputLocation': 's3://bucket/folder'}
+    )
+
+file_name='folder/'+queryStart['QueryExecutionId'] +'.csv'
+output_file='output path'
+
+
+s3.meta.client.download_file('bucket name'
+                             , file_name
+                             ,output_file)
