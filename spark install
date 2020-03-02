@@ -1,0 +1,13 @@
+mkdir wiz_sps
+cd spark/virtualenv
+
+apt install virtualenv
+
+virtualenv -p $(which python3) venv
+source venv/bin/activate
+pip install pyspark
+
+# activate environment
+source ../spark/venv/bin/activate
+#go to folder where python script is
+python python_script.py
