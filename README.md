@@ -1,4 +1,5 @@
-# Machine-Learning
-This repository has few cool stuff regarding machine learning
 
-Starting from loading data and pre processing to building model and analyzing modeling output......
+![img](https://github.com/RamSingh1988/Machine-Learning/blob/master/iStockmachinelearning592x333.jpg)
+
+# Machine-Learning
+This repository has stuff regarding machine learning
