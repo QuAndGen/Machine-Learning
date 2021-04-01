@@ -1,0 +1,236 @@
+#get help
+man 
+
+#to see all files in folder
+ls
+#to see all files with detail like time stamp etc
+ls -al
+
+#to see all hidden files
+ls -a
+
+#create text file by command
+cat > filename
+#to see the content in filename
+cat filename
+#combine two file names
+cat file1 file2 > newfilename
+
+#delete files 
+rm filename
+
+#move file to another location
+
+mv filename new_file_location
+#ex
+mv sample2 /home/guru99/Documents
+
+#use supper user command if any permission required
+#with sudo command we need to provide password which
+#will remain active for 15 mins
+sudo mv filename new_file_location
+
+#to rename file name (same location give older name and new name)
+mv filename newfilename
+
+# to see current directory
+pwd
+
+#create folder 
+mkdir directoryname
+
+#create directory at different location
+mkdir /tmp/MUSIC
+
+#remove directory
+rmdir directoryname
+
+#rename directory
+mv directoryname newdirectoryname
+
+
+mv filename newfilename
+
+#to see history
+history
+
+#remove all commands from history
+clear
+
+#print a file to printer
+lp Filename
+or 
+lpr Filename
+
+#to make multiple copy of print
+lp -n10 testfile
+or
+lpr 10 testfile
+
+#give the name of printer, if you have multiple printer
+lp -dHPofficejet testfile
+or
+lpr -dHPofficejet testfile
+
+# apt-get" commands to install or remove a package
+
+#Let's update all the installed packages in our system using command -
+sudo apt-get update
+
+#install package
+sudo apt-get install packagename
+#ex, to send an email, we need package 'mailutils'
+sudo apt-get install mailutils
+
+	#to send an email by command
+	mail -s 'subject' -c 'cc-address' -b 'bcc-address' 'to-address'
+	#typ your msg and press CTRL+D
+
+# to see the permission on file
+ls - l (r=read, w=write, x=execute)
+
+# give permission
+chmod permissions filename
+#ex chmod rwx filename
+
+#redirect you command output to file
+#The '>' symbol is used for output (STDOUT) redirection.
+
+#send detail fo all files to listings file,this will overwrite file
+ls -al > listings
+#now print that output
+cat listings
+
+#if you do not want your file to overwrite
+cat sample
+echo Thanks for help >>sample
+cat sample
+
+#send your mp3 audio to computer audio
+#The cat command reads the file music.mp3 and sends the output to /dev/audio #which is the audio device. 
+cat music.mp3 > /dev/audio
+
+#The '<' symbol is used for input(STDIN) redirection
+
+#to see the path of environment variable
+echo $PATH
+
+Variable		Description
+PATH	This variable contains a colon (:)-separated list of directories 			in which your system looks for executable files. Linux - Environment 			Variables
+	When you enter a command on terminal, the shell looks for the command in 		different directories mentioned in the $PATH variable. If the command is 		found, it executes. Otherwise, it returns with an error 'command not 			found'.
+USER	The username
+HOME	Default path to the user's home directory
+EDITOR	Path to the program which edits the content of files
+UID	User's unique ID
+TERM	Default terminal emulator
+SHELL	Shell being used by the user
+
+#code
+echo $USER
+
+#to see all all environment variables
+env
+#create new variable
+VARIABLE_NAME= variable_value
+
+#To set value of an environment variable
+export Variable=value
+
+
+#connect with other network
+#SSH which stands for Secure Shel
+SSH username@ip-address or hostname
+#once we are connected, we can use all unix command in that network such as "ls"
+
+
+#delete environment variable
+unset variablename
+
+
+#Ping -This utility is commonly used to check whether your connection to the server is healthy or not.
+	ping hostname="" or=""
+#ex
+	ping 172.16.170.1
+	ping google.com
+#You may Press Ctrl + c to exit from the ping loop.
+
+#FTP-FTP is file transfer protocol. It's the most preferred protocol for data #transfer amongst computers.
+#You can use FTP to -
+#	Logging in and establishing a connection with a remote host
+#	Upload and download files
+#	Navigating through directories
+#	Browsing contents of the directories
+
+ftp hostname
+
+#once we login into that network , we can run following commands
+Command		Function
+dir		Display files in the current directory of a remote computer
+cd "dirname"	change directory to "dirname" on a remote computer
+put file	upload 'file' from local to remote computer
+get file	Download 'file' from remote to local computer
+quit		Logout
+
+#ex
+put sample.txt (upload files)
+get myfile.xlsx (download from there)
+
+#Telnet
+#Telnet helps to -
+#	connect to a remote Linux computer
+#	run programs remotely and conduct administration
+
+telnet localhost
+
+FG----
+#run programe in background
+fg jobname
+
+#ex 
+fg vlc
+
+TOP-This utility tells the user about all the running processes on the Linux machine.
+
+top
+#press q to move out of the process
+
+#PS
+This command stands for 'Process Status'. It is similar to the "Task Manager"
+
+#To check all the processes running under a user, use the command -
+ps ux
+
+#to check particular one process
+ps PID 
+ps 12334
+
+
+#to terminate particular process
+#This command terminates running processes on a Linux machine.
+kill PID
+#to get PID of process
+pidof Process name
+#ex 
+pidof Photoshop.exe
+
+#DF--This utility reports the free disk space(Hard Disk) on all the file systems.
+
+df
+#If you want the above information in a readable format, then use the command
+df -h
+
+#Free--This command shows the free and used memory (RAM) on the Linux system.
+free
+free -m #to display output in MB
+
+free -g #to display output in GB
+
+#unzip
+gzip -d httpd-2.2.26.tar.gz
+tar xvf httpd-2.2.26.tar
+
+
+
+
+
+
