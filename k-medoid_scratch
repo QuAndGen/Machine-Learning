@@ -1,0 +1,110 @@
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+
+def gower_dist(data,vec1,weight=None,num_col=None,chr_col=None):
+    
+    if num_col is None and chr_col is None:
+        raise ValueError('Data must have defined either numeric or categorical or both type of column')
+    
+    num_flag=0
+    
+    if num_col is not None:
+        x1_num=np.array(vec1[num_col]).reshape((1,len(num_col))) #np.array([22635556,  1336260])
+        num_df=data[num_col].values
+        if num_df.shape[1]!=0:
+            num_flag=1
+            x_range=np.array(np.amax(num_df,axis=0)-np.amin(num_df,axis=0)).reshape(1,num_df.shape[1])
+    
+
+    chr_flag=0
+    if chr_col is not None:
+        x1_chr=np.array(vec1[chr_col]).reshape((1,len(chr_col))) # np.array([1,  2])
+        chr_df=data[chr_col].values
+        if chr_df.shape[1]!=0:
+            chr_flag=1
+
+    if num_flag==1:
+        m1=abs(num_df-x1_num)/x_range
+   
+    if chr_flag==1:    
+        m2=np.array(chr_df!=x1_chr,dtype=np.int)
+
+ 
+    if num_flag==1 and chr_flag==1:
+        m=np.hstack([m1,m2])
+        if weight is None:
+            wt=np.ones((1,len(num_col)+len(chr_col)))
+        else:
+            num_wt=np.array(weight).reshape((1,len(num_col)))
+            wt=np.hstack([num_wt,np.ones((1,len(chr_col)))])
+            
+    elif num_flag==1 and chr_flag==0:
+        m=m1
+        if weight is None:
+            wt=np.ones((1,len(num_col)))
+        else:
+            wt=np.array(weight).reshape(len(num_col))
+    elif num_flag==0 and chr_flag==1:
+        m=m2
+        wt=np.ones((1,len(chr_col)))
+    else:
+        m=0
+        wt=1
+    
+    distance=np.sum(m*wt,axis=1)/np.sum(wt)
+        
+    return(distance)
+
+
+le = preprocessing.LabelEncoder()
+
+k=3
+
+df=pd.read_csv("C:/Users/rsingh/Desktop/syringe_symphony.csv")
+
+num_col=df.select_dtypes(include=np.number).columns
+chr_col=df.select_dtypes(include=np.object).columns
+df[chr_col]=df[chr_col].apply(le.fit_transform)
+
+
+
+id=df.index.tolist()
+N=df.shape[0]
+max_iter=4
+tollerance=.0001
+iter=1
+model_output={}
+old_cost=0
+
+while iter<=max_iter:
+    centroid=df.sample(n=k)
+    num_x1=centroid[num_col]
+    chr_x1=centroid[chr_col]
+
+    dist_all=np.zeros((N,1))
+    for i in range(0,k):
+        vec1=centroid.iloc[i,:]
+        dist=gower_dist(data=df,vec1=vec1,weight=None,num_col=num_col,chr_col=None)
+        dist=dist.reshape((N,1))
+        dist_all=np.hstack((dist_all,dist))
+    
+    cluster=list(np.argmin(dist_all[:,1:],axis=1)+1)
+    cost=np.sum(np.amin(dist_all[:,1:],axis=1))
+    model_output['iteration'+str(iter)]={'id':id,'cluster':cluster,'cost':cost,'centers':centroid}
+    if iter==1:
+        old_cost=cost
+        old_centriod=centroid
+    else:
+        if abs(old_cost-cost)<=tollerance:
+            model_output['final']={'id':id,'cluster':cluster,'cost':old_cost,'centers':old_centriod}
+        elif old_cost<=cost:
+            model_output['final']={'id':id,'cluster':cluster,'cost':old_cost,'centers':old_centriod}
+            break
+        else:
+            old_cost=cost
+            old_centriod=centroid
+    iter+=1
+
+output=pd.DataFrame({'cluster':model_output['final']['cluster']
+                    ,'id':model_output['final']['id']})
